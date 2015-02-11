@@ -1,0 +1,31 @@
+#!/bin/sh
+
+. $TS_GLOBAL
+
+case "$1" in
+    init)
+	sed -e "s/#LISTEN_PORT#/$SERIAL_PROXY_LPORT/g" /etc/xinetd.d/serial_proxy > /tmp/serial_proxy
+	cp -f /tmp/serial_proxy /etc/xinetd.d/serial_proxy
+	rm -f /tmp/serial_proxy
+
+	if [ "$SERIAL_PROXY_DEVICE" ] && [ "$SERIAL_PROXY_DEVICE" != "/dev/fp" ] && [ "$SERIAL_PROXY_DEVICE" != "auto" ] ; then
+	    echo "device $SERIAL_PROXY_DEVICE" > $SERIAL_PROXY_CONFIG
+	fi
+
+	DEVICES="/dev/ttyS0"
+	DEVICES="$DEVICES "`ls /dev/tty* | egrep '(USB|ACM)'`
+
+	for device in $DEVICES; do
+	    /etc/udev/scripts/detect_serial_proxy.sh $device &
+	done
+
+	while [ `ps |  grep -v grep | grep -c detect_serial_proxy` != "0" ]; do
+	    sleep 1
+	done
+    ;;
+    *)
+	exit 1
+    ;;
+esac
+
+exit 0

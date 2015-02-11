@@ -1,0 +1,12 @@
+service serial_proxy
+{
+    disable = no
+    type = UNLISTED
+    protocol = tcp
+    port = #LISTEN_PORT#
+    socket_type = stream
+    wait = no
+    user = root
+    group = root
+    server = /bin/serial_proxy
+}
